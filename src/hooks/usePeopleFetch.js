@@ -3,6 +3,7 @@ import axios from "axios";
 
 export const usePeopleFetch = () => {
   const [users, setUsers] = useState([]);
+  const [favorites, setfavorites] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -13,8 +14,11 @@ export const usePeopleFetch = () => {
     setIsLoading(true);
     const response = await axios.get(`https://randomuser.me/api/?results=25&page=1`);
     setIsLoading(false);
+
     setUsers(response.data.results);
+ 
+   
   }
 
-  return { users, isLoading, fetchUsers };
+  return { users,favorites, isLoading, fetchUsers };
 };

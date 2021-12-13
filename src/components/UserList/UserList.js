@@ -5,30 +5,98 @@ import CheckBox from "components/CheckBox";
 import IconButton from "@material-ui/core/IconButton";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import * as S from "./style";
+import { Favorite } from "pages";
+import axios from "axios";
 
-const UserList = ({ users, isLoading }) => {
+const UserList = ({ users,favorites, isLoading,favoritesPage }) => {
   const [hoveredUserId, setHoveredUserId] = useState();
+
+  const [CountriesState, setCountriesState] = useState([]);
+  const [UsersState, setUsersState] = useState([]);
+  const [FavoriteState, setFavoriteState] = useState([]);
 
   const handleMouseEnter = (index) => {
     setHoveredUserId(index);
+ 
   };
 
+  useEffect(() => {
+    
+    setUsersState([...users]);
+    setFavoriteState([...favorites])
+   
+  },[users])
+
+  // LifeCycle when CountriesState or users change
+  useEffect(() => {
+    
+
+    if(CountriesState.length===0) setUsersState([...users]);
+    else{
+      //if there is Counties to filter, do filter on user with country in CountriesStateState
+      setUsersState(users.filter(user=>CountriesState.includes(user.location.country)))
+    }
+  }, [CountriesState,users])
   const handleMouseLeave = () => {
     setHoveredUserId();
-  };
 
+  };
+ 
+  const addCountryFilter=(country)=>{
+    
+    //if not include add it
+    if(!CountriesState.includes(country))    setCountriesState([...CountriesState,country])
+   
+//if itsn't includes delete it
+    else 
+    setCountriesState(CountriesState.filter(val => val!== country)) 
+  }
+
+   async function addFavorite (user){
+  
+
+    
+   if (FavoriteState.length===0 || !FavoriteState.some(favorite=> favorite.login.uuid=== user.login.uuid)){
+   
+
+   
+    setFavoriteState([...FavoriteState,user]);
+ 
+      const res1 = await axios.delete('https://db-ppl-default-rtdb.firebaseio.com/favorites.json');
+    const res2 = await axios.post('https://db-ppl-default-rtdb.firebaseio.com/favorites.json',[...FavoriteState,user]);
+   }
+    else{
+      const filterArr = FavoriteState.filter(val => val.login.uuid!== user.login.uuid);
+    
+    if (favoritesPage){
+      setUsersState(filterArr);
+    }
+      const res1 = setFavoriteState(filterArr);
+      
+      const res = await axios.delete('https://db-ppl-default-rtdb.firebaseio.com/favorites.json');
+      const res2 = await axios.post('https://db-ppl-default-rtdb.firebaseio.com/favorites.json',filterArr);
+
+
+      console.log('update here');
+    }
+
+
+  };
+  // const countriesCheckBox =['Brazil','Australia','Canada','Germany','United States'];
   return (
     <S.UserList>
       <S.Filters>
-        <CheckBox value="BR" label="Brazil" />
-        <CheckBox value="AU" label="Australia" />
-        <CheckBox value="CA" label="Canada" />
-        <CheckBox value="DE" label="Germany" />
+        <CheckBox onChange={addCountryFilter} value="Brazil" label="Brazil" />
+        <CheckBox onChange={addCountryFilter} value="Australia" label="Australia" />
+        <CheckBox onChange={addCountryFilter} value="Canada"  label="Canada" />
+        <CheckBox onChange={addCountryFilter} value="Germany" label="Germany" />
+        <CheckBox onChange={addCountryFilter} value="United States" label="United States" />
       </S.Filters>
       <S.List>
-        {users.map((user, index) => {
+        {(UsersState.length!==0|| !favoritesPage)?  UsersState.map((user, index) => {
           return (
             <S.User
+         
               key={index}
               onMouseEnter={() => handleMouseEnter(index)}
               onMouseLeave={handleMouseLeave}
@@ -46,14 +114,15 @@ const UserList = ({ users, isLoading }) => {
                   {user?.location.city} {user?.location.country}
                 </Text>
               </S.UserInfo>
-              <S.IconButtonWrapper isVisible={index === hoveredUserId}>
-                <IconButton>
+              <S.IconButtonWrapper isVisible={FavoriteState.includes(user) || index===hoveredUserId}>
+                <IconButton    onClick ={()=> addFavorite(user)}>
                   <FavoriteIcon color="error" />
                 </IconButton>
               </S.IconButtonWrapper>
             </S.User>
           );
-        })}
+        }):
+        <p>There is no favorite user</p>}
         {isLoading && (
           <S.SpinnerWrapper>
             <Spinner color="primary" size="45px" thickness={6} variant="indeterminate" />

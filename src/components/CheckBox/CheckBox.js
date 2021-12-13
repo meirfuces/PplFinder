@@ -6,6 +6,7 @@ import * as S from "./style";
 const CheckBox = ({ isChecked, onChange, label, value }) => {
   const handleChange = () => {
     onChange && onChange(value);
+    console.log(value);
   };
   return (
     <S.CheckBox>

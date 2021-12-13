@@ -12,6 +12,8 @@
     "@testing-library/user-event": "^12.8.3",
     "axios": "^0.21.1",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "firebase": "^9.6.1",
+    "nodemon": "^2.0.15",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router": "^5.2.0",
@@ -23,6 +25,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start2": "nodemon AppRouter.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
